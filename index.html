@@ -1,1295 +1,553 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PosterForge – Éditeur d'affiches professionnel</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js">
-    </script>
-    <style>
-        :root {
-            --bg: #1e1e1e;
-            --panel: #252526;
-            --input: #333;
-            --text: #ccc;
-            --text2: #999;
-            --border: #3c3c3c;
-            --accent: #0078d4;
-            --header: #2d2d30;
-            --toolbar-w: 48px;
-            --sidebar-w: 290px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Vision · Espace de travail</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --glass-bg: rgba(20, 20, 28, 0.45);
+      --glass-bg-hover: rgba(30, 30, 40, 0.55);
+      --glass-bg-active: rgba(40, 40, 55, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.10);
+      --glass-border-strong: rgba(255, 255, 255, 0.18);
+      --glass-highlight: rgba(255, 255, 255, 0.06);
+      --blur-amount: 28px;
+      --blur-hover: 32px;
+      --accent: #6c7bff;
+      --accent-glow: rgba(108, 123, 255, 0.25);
+      --accent-soft: rgba(108, 123, 255, 0.15);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.65);
+      --text-tertiary: rgba(255, 255, 255, 0.40);
+      --bg-base: #0a0a14;
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 26px;
+      --radius-xl: 32px;
+      --shadow-glass: 0 8px 40px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-elevated: 0 16px 60px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+      --transition-smooth: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+      --transition-bounce: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            user-select: none;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        .header {
-            height: 38px;
-            background: var(--header);
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            border-bottom: 1px solid var(--border);
-            gap: 18px;
-            z-index: 20;
-        }
-        .logo {
-            font-weight: 700;
-            font-size: 15px;
-            letter-spacing: 0.3px;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .header-actions {
-            display: flex;
-            gap: 6px;
-            margin-left: auto;
-        }
-        .btn {
-            background: var(--input);
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 5px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background .15s;
-            white-space: nowrap;
-        }
-        .btn:hover {
-            background: #3e3e42;
-        }
-        .btn.primary {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #fff;
-        }
-        .btn.primary:hover {
-            background: #1a8ad4;
-        }
-        .btn svg {
-            width: 15px;
-            height: 15px;
-            fill: currentColor;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--bg-base);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 0;
+      color: var(--text-primary);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
 
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+    /* Fond dynamique riche pour le glassmorphism */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -30%;
+      width: 160%;
+      height: 160%;
+      background:
+        radial-gradient(ellipse at 25% 30%, rgba(99, 102, 241, 0.20) 0%, transparent 55%),
+        radial-gradient(ellipse at 65% 25%, rgba(168, 85, 247, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 45% 70%, rgba(236, 72, 153, 0.15) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 65%, rgba(59, 130, 246, 0.16) 0%, transparent 55%),
+        radial-gradient(ellipse at 15% 80%, rgba(34, 211, 238, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%, rgba(15, 15, 30, 0.4) 0%, transparent 70%);
+      background-size: 100% 100%;
+      z-index: 0;
+      pointer-events: none;
+      animation: bgShift 25s ease-in-out infinite alternate;
+    }
+    @keyframes bgShift {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.08) translate(-2%, 1%); }
+    }
 
-        .toolbar {
-            width: var(--toolbar-w);
-            background: var(--header);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 6px 0;
-            gap: 1px;
-        }
-        .tool-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ccc;
-            cursor: pointer;
-            transition: .15s;
-            position: relative;
-        }
-        .tool-btn:hover {
-            background: #3e3e42;
-        }
-        .tool-btn.active {
-            background: var(--accent);
-            color: #fff;
-        }
-        .tool-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-        .tool-sep {
-            width: 28px;
-            height: 1px;
-            background: var(--border);
-            margin: 3px 0;
-        }
+    .app-container {
+      width: 100%;
+      max-width: 1340px;
+      height: 100vh;
+      height: 100dvh;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
 
-        .canvas-area {
-            flex: 1;
-            background: #1a1a1a;
-            position: relative;
-            overflow: hidden;
-        }
-        canvas {
-            display: block;
-        }
+    @media (min-width: 768px) {
+      body { padding: 18px; }
+      .app-container {
+        height: 870px;
+        max-height: 95vh;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-elevated), 0 0 0 1px rgba(255,255,255,0.08);
+      }
+    }
 
-        .sidebar {
-            width: var(--sidebar-w);
-            background: var(--panel);
-            border-left: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            font-size: 12px;
-        }
+    /* ---------- SIDEBAR ---------- */
+    .sidebar {
+      width: 265px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--blur-amount));
+      -webkit-backdrop-filter: blur(var(--blur-amount));
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: transform var(--transition-smooth);
+      z-index: 10;
+      border-top: 1px solid var(--glass-highlight);
+    }
+    @media (max-width: 767px) {
+      .sidebar {
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 285px;
+        transform: translateX(-100%);
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        box-shadow: var(--shadow-glass);
+      }
+      .sidebar.open { transform: translateX(0); }
+    }
 
-        /* Tab Buttons */
-        .tab-row {
-            display: flex;
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 8px 6px;
-            background: transparent;
-            border: none;
-            color: var(--text2);
-            cursor: pointer;
-            font-size: 11px;
-            text-align: center;
-            border-bottom: 2px solid transparent;
-            transition: .15s;
-            white-space: nowrap;
-        }
-        .tab-btn:hover {
-            color: #fff;
-            background: #2a2a2e;
-        }
-        .tab-btn.active {
-            color: #fff;
-            border-bottom-color: var(--accent);
-        }
-        .tab-content {
-            display: none;
-            flex: 1;
-            overflow-y: auto;
-        }
-        .tab-content.active {
-            display: block;
-        }
+    .sidebar-header {
+      padding: 20px 16px 14px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--glass-border);
+      letter-spacing: -0.2px;
+    }
+    .sidebar-header i { width: 24px; height: 24px; color: var(--accent); filter: drop-shadow(0 0 8px var(--accent-glow)); }
 
-        .panel {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-        }
-        .panel-title {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text2);
-            margin-bottom: 7px;
-            font-weight: 600;
-        }
-        .layer-item {
-            display: flex;
-            align-items: center;
-            padding: 5px 6px;
-            border-radius: 3px;
-            margin-bottom: 1px;
-            cursor: pointer;
-            gap: 6px;
-            font-size: 11px;
-        }
-        .layer-item:hover {
-            background: #2a2a2e;
-        }
-        .layer-item.selected {
-            background: var(--accent);
-        }
-        .layer-item svg {
-            width: 14px;
-            height: 14px;
-            fill: #aaa;
-            flex-shrink: 0;
-        }
-        .layer-name {
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .layer-vis {
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .layer-vis.hidden svg {
-            fill: #444;
-        }
-        .layer-del {
-            cursor: pointer;
-            flex-shrink: 0;
-            opacity: 0;
-            transition: opacity .15s;
-        }
-        .layer-item:hover .layer-del {
-            opacity: 1;
-        }
-        .layer-del svg {
-            fill: #d32f2f;
-            width: 13px;
-            height: 13px;
-        }
-        .prop-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 7px;
-            gap: 7px;
-        }
-        .prop-row label {
-            width: 70px;
-            color: var(--text2);
-            font-size: 11px;
-            flex-shrink: 0;
-        }
-        .prop-row input[type="color"] {
-            width: 32px;
-            height: 24px;
-            border: 1px solid var(--border);
-            background: var(--input);
-            cursor: pointer;
-            padding: 0;
-            flex-shrink: 0;
-        }
-        .prop-row input[type="range"] {
-            flex: 1;
-            accent-color: var(--accent);
-        }
-        .prop-row input[type="number"] {
-            width: 50px;
-            background: var(--input);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 3px 5px;
-            border-radius: 3px;
-            text-align: center;
-            font-size: 11px;
-            flex-shrink: 0;
-        }
-        .prop-row span {
-            font-size: 11px;
-            color: var(--text2);
-            flex-shrink: 0;
-            min-width: 30px;
-            text-align: right;
-        }
-        .statusbar {
-            height: 24px;
-            background: #007acc;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            font-size: 11px;
-            gap: 20px;
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .loading-overlay.show {
-            display: flex;
-        }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #333;
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        ::-webkit-scrollbar {
-            width: 7px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--panel);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #424242;
-            border-radius: 4px;
-        }
-    </style>
+    .sidebar-scroll {
+      flex: 1; overflow-y: auto; padding: 14px 10px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+
+    .nav-label {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.7px;
+      color: var(--text-tertiary); padding: 6px 10px 4px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .nav-label i { width: 13px; height: 13px; opacity: 0.7; }
+
+    .channel-item, .dm-item, .task-item {
+      display: flex; align-items: center; gap: 9px; padding: 9px 11px;
+      border-radius: var(--radius-sm); color: var(--text-secondary);
+      font-size: 0.86rem; cursor: pointer; transition: all var(--transition-smooth);
+      font-weight: 480; border: none; background: none; width: 100%; text-align: left;
+      position: relative;
+    }
+    .channel-item i, .dm-item i, .task-item i { width: 16px; height: 16px; color: var(--text-tertiary); transition: color 0.2s; }
+    .channel-item:hover, .dm-item:hover, .task-item:hover {
+      background: var(--glass-bg-hover); color: #fff;
+      backdrop-filter: blur(var(--blur-hover)); -webkit-backdrop-filter: blur(var(--blur-hover));
+      border: 1px solid var(--glass-border-strong);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .channel-item.active, .dm-item.active, .task-item.active {
+      background: var(--accent-soft); color: #fff; font-weight: 550;
+      border: 1px solid rgba(108,123,255,0.25);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .channel-item.active i, .dm-item.active i, .task-item.active i { color: var(--accent); }
+
+    .dm-avatar {
+      width: 26px; height: 26px; border-radius: 8px; background: rgba(255,255,255,0.12);
+      font-size: 0.68rem; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #ddd; flex-shrink: 0;
+    }
+    .unread-badge {
+      margin-left: auto; background: var(--accent); color: #fff; font-size: 0.62rem;
+      padding: 2px 7px; border-radius: 12px; font-weight: 600;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; margin-left: auto; background: #4ade80; box-shadow: 0 0 8px #4ade80; }
+    .status-dot.away { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+
+    .sidebar-footer { padding: 10px; border-top: 1px solid var(--glass-border); }
+    .new-message-btn {
+      width: 100%; background: rgba(108,123,255,0.25); border: 1px solid rgba(108,123,255,0.35);
+      color: #fff; padding: 11px 12px; border-radius: var(--radius-sm); font-weight: 600;
+      font-size: 0.82rem; display: flex; align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer; transition: all var(--transition-smooth);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .new-message-btn:hover { background: rgba(108,123,255,0.40); box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
+    .new-message-btn i { width: 15px; height: 15px; }
+
+    .sidebar-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.55); z-index: 5; }
+    @media (max-width: 767px) { .sidebar-overlay.active { display: block; } }
+
+    /* ---------- MAIN PANEL ---------- */
+    .main-panel {
+      flex: 1; display: flex; flex-direction: column;
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount));
+      overflow: hidden; border-radius: 0;
+      border-top: 1px solid var(--glass-highlight);
+    }
+    @media (min-width: 768px) { .main-panel { border-radius: 0 var(--radius-xl) var(--radius-xl) 0; } }
+
+    .top-bar {
+      padding: 12px 18px; border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: center; gap: 14px; background: transparent; z-index: 2; min-height: 54px;
+    }
+    .hamburger {
+      display: flex; align-items: center; justify-content: center; width: 34px; height: 34px;
+      border-radius: 10px; background: none; border: none; color: var(--text-secondary); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .hamburger:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    @media (min-width: 768px) { .hamburger { display: none; } }
+    .hamburger i { width: 22px; height: 22px; }
+
+    .close-view-btn {
+      display: flex; align-items: center; justify-content: center; width: 34px; height: 34px;
+      border-radius: 10px; background: none; border: 1px solid transparent; color: var(--text-secondary);
+      cursor: pointer; transition: all var(--transition-smooth); margin-left: auto;
+    }
+    .close-view-btn:hover {
+      background: rgba(255,100,100,0.12); border-color: rgba(255,100,100,0.3);
+      color: #ff6b6b; box-shadow: 0 0 16px rgba(255,100,100,0.2);
+    }
+    .close-view-btn i { width: 18px; height: 18px; }
+
+    .search-box {
+      flex: 1; max-width: 420px;
+      background: rgba(30,30,40,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-radius: 22px; display: flex; align-items: center; padding: 8px 15px; gap: 9px;
+      border: 1px solid var(--glass-border); transition: all var(--transition-smooth);
+    }
+    .search-box i { width: 16px; height: 16px; color: var(--text-tertiary); }
+    .search-box input { background: transparent; border: none; color: #fff; font-size: 0.86rem; width: 100%; outline: none; }
+    .search-box input::placeholder { color: var(--text-tertiary); }
+    .search-box:focus-within { border-color: var(--accent); background: rgba(40,40,55,0.5); box-shadow: 0 0 20px var(--accent-glow); }
+
+    .channel-header { display: flex; align-items: center; gap: 9px; font-weight: 650; font-size: 0.97rem; color: #fff; }
+    .channel-header i { width: 18px; height: 18px; color: var(--text-secondary); }
+
+    .chat-view { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .message-feed { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 768px) { .message-feed { padding: 18px 22px; gap: 16px; } }
+
+    .message { display: flex; gap: 10px; align-items: flex-start; animation: fadeSlide 0.25s ease; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .msg-avatar {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: rgba(255,255,255,0.10); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; font-weight: 650;
+      font-size: 0.72rem; flex-shrink: 0; color: #ddd;
+      border: 1px solid var(--glass-border);
+    }
+    @media (min-width: 768px) { .msg-avatar { width: 36px; height: 36px; font-size: 0.78rem; } }
+    .msg-body {
+      background: rgba(30,30,42,0.45); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-radius: var(--radius-md); padding: 9px 14px; max-width: 82%;
+      border: 1px solid var(--glass-border); transition: all var(--transition-smooth);
+    }
+    .msg-body:hover { background: rgba(35,35,50,0.55); border-color: var(--glass-border-strong); }
+    @media (min-width: 768px) { .msg-body { padding: 11px 17px; max-width: 72%; } }
+    .msg-author { font-size: 0.76rem; font-weight: 650; color: #b8c2ff; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+    .msg-time { font-size: 0.62rem; color: var(--text-tertiary); font-weight: 400; }
+    .msg-text { font-size: 0.87rem; color: #f0f0f5; line-height: 1.5; }
+    .msg-actions { display: flex; gap: 7px; margin-top: 7px; align-items: center; flex-wrap: wrap; }
+    .msg-action-btn {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+      border-radius: 16px; color: var(--text-secondary); cursor: pointer;
+      display: flex; align-items: center; gap: 5px; font-size: 0.7rem; padding: 5px 11px;
+      transition: all var(--transition-smooth); backdrop-filter: blur(6px);
+    }
+    .msg-action-btn:hover { background: rgba(255,255,255,0.10); color: #fff; border-color: var(--glass-border-strong); }
+    .msg-action-btn i { width: 12px; height: 12px; }
+    .reaction-badge {
+      background: rgba(255,255,255,0.06); backdrop-filter: blur(6px);
+      border-radius: 14px; padding: 3px 9px; font-size: 0.7rem; display: flex; align-items: center;
+      gap: 4px; cursor: pointer; border: 1px solid var(--glass-border);
+    }
+    .reaction-badge:hover { background: rgba(255,255,255,0.12); }
+
+    .message-input-area {
+      padding: 12px 16px; border-top: 1px solid var(--glass-border);
+      display: flex; gap: 8px; align-items: center; background: transparent;
+    }
+    @media (min-width: 768px) { .message-input-area { padding: 14px 22px; gap: 10px; } }
+    .message-input {
+      flex: 1; background: rgba(25,25,38,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border); border-radius: 20px; padding: 11px 16px;
+      color: #fff; font-size: 0.86rem; outline: none; transition: all var(--transition-smooth);
+    }
+    .message-input:focus { border-color: var(--accent); background: rgba(35,35,50,0.55); box-shadow: 0 0 18px var(--accent-glow); }
+    .send-btn {
+      background: var(--accent); border: none; border-radius: 50%; width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff;
+      flex-shrink: 0; transition: all var(--transition-bounce);
+      box-shadow: 0 4px 18px var(--accent-glow);
+    }
+    .send-btn:hover { background: #7c8aff; box-shadow: 0 6px 24px rgba(108,123,255,0.5); transform: scale(1.06); }
+    .send-btn:active { transform: scale(0.94); }
+    .send-btn i { width: 19px; height: 19px; }
+
+    /* ---------- TASK VIEWS ---------- */
+    .task-view { display: none; flex: 1; flex-direction: column; padding: 16px; overflow-y: auto; gap: 11px; }
+    .task-view.active { display: flex; }
+    @media (min-width: 768px) { .task-view { padding: 22px 26px; gap: 14px; } }
+    .task-card {
+      background: rgba(28,28,40,0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius-md); padding: 13px 16px; display: flex; align-items: center;
+      gap: 11px; border: 1px solid var(--glass-border); cursor: pointer;
+      transition: all var(--transition-smooth);
+    }
+    .task-card:hover { background: rgba(35,35,50,0.55); border-color: var(--glass-border-strong); }
+    .task-checkbox {
+      width: 21px; height: 21px; border: 2px solid rgba(255,255,255,0.35); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; color: transparent; flex-shrink: 0;
+      transition: all var(--transition-smooth);
+    }
+    .task-card.done .task-checkbox { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 12px var(--accent-glow); }
+    .task-title { font-size: 0.87rem; color: #eee; }
+    .task-card.done .task-title { text-decoration: line-through; color: rgba(255,255,255,0.35); }
+    .task-assignee {
+      margin-left: auto; font-size: 0.66rem; background: rgba(255,255,255,0.08);
+      padding: 4px 10px; border-radius: 12px; color: #ccc; white-space: nowrap;
+    }
+
+    /* ---------- THREAD PANEL ---------- */
+    .detail-panel {
+      width: 0; overflow: hidden;
+      background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount));
+      border-left: 1px solid var(--glass-border); transition: width var(--transition-smooth);
+      display: flex; flex-direction: column; z-index: 15;
+      border-top: 1px solid var(--glass-highlight);
+    }
+    .detail-panel.open { width: 330px; }
+    @media (max-width: 767px) {
+      .detail-panel.open {
+        position: absolute; right: 0; top: 0; bottom: 0; width: 300px;
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg); box-shadow: var(--shadow-glass);
+      }
+    }
+    .detail-header {
+      padding: 16px; font-weight: 650; color: #fff; border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: center; gap: 9px; font-size: 0.9rem;
+    }
+    .detail-header i { width: 17px; height: 17px; cursor: pointer; color: var(--text-secondary); transition: color 0.2s; }
+    .detail-header i:hover { color: #ff6b6b; }
+    .detail-thread { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .thread-message {
+      background: rgba(25,25,38,0.5); backdrop-filter: blur(10px); border-radius: var(--radius-sm);
+      padding: 10px 14px; font-size: 0.81rem; color: #ddd; border: 1px solid var(--glass-border);
+    }
+    .thread-input { border-top: 1px solid var(--glass-border); padding: 10px; display: flex; gap: 7px; }
+    .thread-input input {
+      flex: 1; background: rgba(25,25,38,0.5); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm); padding: 9px 12px; color: #fff; font-size: 0.8rem; outline: none;
+    }
+
+    .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 11px; }
+    .file-card {
+      background: rgba(28,28,40,0.45); backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 16px 12px; text-align: center; cursor: pointer;
+      transition: all var(--transition-smooth);
+    }
+    .file-card:hover { background: rgba(35,35,50,0.55); border-color: var(--glass-border-strong); }
+    .file-card i { width: 30px; height: 30px; margin-bottom: 8px; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+  </style>
 </head>
 <body>
+  <div class="app-container">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- HEADER -->
-    <div class="header">
-        <div class="logo">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2zm0 4h5v2H8v-2z" fill="currentColor"/></svg>
-            PosterForge
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header"><i data-lucide="eye"></i> Vision</div>
+      <div class="sidebar-scroll">
+        <div class="nav-section">
+          <div class="nav-label"><i data-lucide="hash"></i> Canaux</div>
+          <button class="channel-item active" data-channel="general"><i data-lucide="hash"></i> général</button>
+          <button class="channel-item" data-channel="lancement-nova"><i data-lucide="hash"></i> lancement-nova</button>
+          <button class="channel-item" data-channel="design-system"><i data-lucide="hash"></i> design-system</button>
         </div>
-        <div class="header-actions">
-            <button class="btn" onclick="newDocument()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h5v7h7v9H6z"/></svg>Nouveau</button>
-            <button class="btn" onclick="openFile()"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg>Ouvrir</button>
-            <button class="btn" onclick="exportImage('png')"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>PNG</button>
-            <button class="btn" onclick="exportImage('jpeg')"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>JPEG</button>
-            <button class="btn" onclick="undo()"><svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05 1-6.9 2.6L2 7v9h9l-3.62-3.62C8.64 11.04 10.43 10 12.5 10c2.76 0 5 2.24 5 5s-2.24 5-5 5-5-2.24-5-5H5c0 4.14 3.36 7.5 7.5 7.5s7.5-3.36 7.5-7.5S16.64 8 12.5 8z"/></svg></button>
-            <button class="btn" onclick="redo()"><svg viewBox="0 0 24 24"><path d="M18.4 10.6C16.55 9 14.15 8 11.5 8c-4.14 0-7.5 3.36-7.5 7.5S7.36 23 11.5 23s7.5-3.36 7.5-7.5H17c0 3.04-2.46 5.5-5.5 5.5S6 18.54 6 15.5 8.46 10 11.5 10c1.96 0 3.73.81 5 2.11L13 15h9V6l-3.6 4.6z"/></svg></button>
+        <div class="nav-section">
+          <div class="nav-label"><i data-lucide="message-square"></i> Messages directs</div>
+          <button class="dm-item" data-dm="camille"><span class="dm-avatar">CM</span> Camille M. <span class="status-dot"></span></button>
+          <button class="dm-item" data-dm="julien"><span class="dm-avatar">JD</span> Julien D. <span class="status-dot away"></span></button>
+          <button class="dm-item" data-dm="sarah"><span class="dm-avatar">SL</span> Sarah L. <span class="unread-badge">2</span></button>
         </div>
-    </div>
-
-    <!-- MAIN -->
-    <div class="main">
-        <!-- TOOLBAR -->
-        <div class="toolbar" id="toolbar">
-            <div class="tool-btn active" data-tool="select" title="Déplacement (V)"><svg viewBox="0 0 24 24"><path d="M8 2l12 12h-5l-3 8-4-16z"/></svg></div>
-            <div class="tool-btn" data-tool="rectangle" title="Rectangle (R)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
-            <div class="tool-btn" data-tool="ellipse" title="Ellipse (C)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
-            <div class="tool-btn" data-tool="line" title="Ligne (L)"><svg viewBox="0 0 24 24"><line x1="4" y1="20" x2="20" y2="4" stroke="currentColor" stroke-width="2"/></svg></div>
-            <div class="tool-btn" data-tool="text" title="Texte (T)"><svg viewBox="0 0 24 24"><text x="3" y="18" font-size="16" font-weight="bold" fill="currentColor">T</text></svg></div>
-            <div class="tool-btn" data-tool="brush" title="Pinceau (B)"><svg viewBox="0 0 24 24"><path d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"/></svg></div>
-            <div class="tool-btn" data-tool="eraser" title="Gomme (E)"><svg viewBox="0 0 24 24"><path d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.01 4.01 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0zM4.22 15.58l3.54 3.54c.78.79 2.04.79 2.83 0l3.54-3.54-6.37-6.37-3.54 3.54z"/></svg></div>
-            <div class="tool-btn" data-tool="wand" title="Baguette magique (W)"><svg viewBox="0 0 24 24"><path d="M7.5 5.6L5 7l1.4-2.5L5 2l2.5 1.4L10 2 8.6 4.5 10 7 7.5 5.6zM19.5 15.6L22 13l-1.4 2.5L22 18l-3.5-2.1L15 18l1.4-2.5L15 13l3.5 1.4 3.5-1.4-1.4 2.5 1.4 2.5-2.5-1.4zM12 21l-2-2.5L6 22l1-4-3-2h4l1-3 1 3h4l-3 2 1 4-4-1.5L12 21z"/></svg></div>
-            <div class="tool-btn" data-tool="eyedropper" title="Pipette (I)"><svg viewBox="0 0 24 24"><path d="M19.35 4.65l-1.41-1.41-6.53 6.53 1.41 1.41 6.53-6.53zM11 13l-1 1-6 6H2v-2l6-6 1-1 2 2z"/></svg></div>
-            <div class="tool-btn" data-tool="hand" title="Main (H)"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-4 0v-6m4-1h-5.29l-1.42-1.42A1 1 0 0 0 10.59 10H4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6.59a2 2 0 0 0 1.41-.59l5.71-5.71A2 2 0 0 0 18 13z"/></svg></div>
-            <div class="tool-btn" data-tool="zoom" title="Zoom (Z)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2"/></svg></div>
-            <div class="tool-sep"></div>
-            <div class="tool-btn" data-tool="delete" title="Supprimer (Suppr)"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div>
+        <div class="nav-section">
+          <div class="nav-label"><i data-lucide="check-square"></i> Tâches</div>
+          <button class="task-item" data-view="team-tasks"><i data-lucide="list"></i> Tâches d'équipe</button>
+          <button class="task-item" data-view="my-tasks"><i data-lucide="clipboard-check"></i> Mes tâches</button>
+          <button class="task-item" data-view="files"><i data-lucide="folder"></i> Fichiers</button>
         </div>
+      </div>
+      <div class="sidebar-footer">
+        <button class="new-message-btn" id="newMessageBtn"><i data-lucide="plus"></i> Nouveau message</button>
+      </div>
+    </aside>
 
-        <!-- CANVAS -->
-        <div class="canvas-area" id="canvasWrapper">
-            <canvas id="myCanvas"></canvas>
+    <main class="main-panel" id="mainPanel">
+      <!-- Chat général -->
+      <div id="chat-general" class="chat-view">
+        <div class="top-bar">
+          <button class="hamburger"><i data-lucide="menu"></i></button>
+          <div class="channel-header"><i data-lucide="hash"></i> général</div>
+          <div class="search-box" style="margin-left:auto;"><i data-lucide="search"></i><input placeholder="Rechercher..."></div>
         </div>
-
-        <!-- SIDEBAR -->
-        <div class="sidebar" id="sidebar">
-            <div class="tab-row">
-                <button class="tab-btn active" onclick="switchTab('layers')">Calques</button>
-                <button class="tab-btn" onclick="switchTab('properties')">Propriétés</button>
-                <button class="tab-btn" onclick="switchTab('raw')">Camera Raw</button>
-                <button class="tab-btn" onclick="switchTab('ai')">IA</button>
-            </div>
-
-            <!-- Calques -->
-            <div class="tab-content active" id="tab-layers">
-                <div class="panel">
-                    <div class="panel-title">Calques</div>
-                    <div id="layersList" style="max-height:220px;overflow-y:auto;"></div>
-                    <div style="margin-top:6px;display:flex;gap:4px;">
-                        <button class="btn" onclick="moveLayerUp()" style="padding:3px 8px;"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z" fill="currentColor"/></svg></button>
-                        <button class="btn" onclick="moveLayerDown()" style="padding:3px 8px;"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z" fill="currentColor"/></svg></button>
-                        <button class="btn" onclick="duplicateLayer()" style="padding:3px 8px;"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg></button>
-                    </div>
-                </div>
-                <div class="panel">
-                    <div class="panel-title">Document</div>
-                    <div class="prop-row"><label>Largeur</label><input type="number" id="canvasW" value="2480" min="100" max="8000" style="width:70px;"></div>
-                    <div class="prop-row"><label>Hauteur</label><input type="number" id="canvasH" value="3508" min="100" max="8000" style="width:70px;"></div>
-                    <button class="btn" onclick="resizeCanvas()" style="font-size:11px;">Appliquer</button>
-                </div>
-            </div>
-
-            <!-- Propriétés -->
-            <div class="tab-content" id="tab-properties">
-                <div class="panel">
-                    <div class="panel-title">Apparence</div>
-                    <div class="prop-row"><label>Couleur fond</label><input type="color" id="fillColor" value="#cc0000" onchange="updateProp('fill',this.value)"></div>
-                    <div class="prop-row"><label>Contour</label><input type="color" id="strokeColor" value="#000000" onchange="updateProp('stroke',this.value)"></div>
-                    <div class="prop-row"><label>Épaisseur</label><input type="range" id="strokeWidth" min="0" max="20" value="2" oninput="updateProp('strokeWidth',this.value)"><input type="number" id="strokeWidthNum" min="0" max="20" value="2" onchange="updateProp('strokeWidth',this.value)"></div>
-                    <div class="prop-row"><label>Opacité</label><input type="range" id="opacity" min="0" max="1" step="0.01" value="1" oninput="updateProp('opacity',this.value)"><span id="opacityVal">100%</span></div>
-                </div>
-            </div>
-
-            <!-- Camera Raw -->
-            <div class="tab-content" id="tab-raw">
-                <div class="panel">
-                    <div class="panel-title">Réglages de base</div>
-                    <div class="prop-row"><label>Température</label><input type="range" id="rawTemp" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawTempNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Teinte</label><input type="range" id="rawTint" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawTintNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Exposition</label><input type="range" id="rawExposure" min="-5" max="5" step="0.1" value="0" oninput="rawSliderChanged()"><input type="number" id="rawExpNum" value="0" step="0.1" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Contraste</label><input type="range" id="rawContrast" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawContrastNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Hautes lum.</label><input type="range" id="rawHighlights" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawHighNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Ombres</label><input type="range" id="rawShadows" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawShaNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Blancs</label><input type="range" id="rawWhites" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawWhiNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Noirs</label><input type="range" id="rawBlacks" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawBlaNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Clarté</label><input type="range" id="rawClarity" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawClaNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Vibrance</label><input type="range" id="rawVibrance" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawVibNum" value="0" onchange="rawNumChanged()"></div>
-                    <div class="prop-row"><label>Saturation</label><input type="range" id="rawSaturation" min="-100" max="100" value="0" oninput="rawSliderChanged()"><input type="number" id="rawSatNum" value="0" onchange="rawNumChanged()"></div>
-                    <button class="btn" onclick="applyRawToSelected()" style="width:100%;">Appliquer sur l'objet sélectionné</button>
-                </div>
-            </div>
-
-            <!-- IA -->
-            <div class="tab-content" id="tab-ai">
-                <div class="panel">
-                    <div class="panel-title">Intelligence artificielle</div>
-                    <p style="color:var(--text2);font-size:11px;margin-bottom:10px;">Sélectionnez une image importée puis utilisez les outils IA.</p>
-                    <button class="btn primary" onclick="aiRemoveBackground()" style="width:100%;margin-bottom:6px;"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/></svg>Détourage automatique (fond → transparent)</button>
-                    <button class="btn" onclick="aiDetectSubject()" style="width:100%;margin-bottom:6px;"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>Détection automatique du sujet</button>
-                    <p id="aiStatus" style="color:var(--text2);font-size:11px;margin-top:6px;"></p>
-                </div>
-                <div class="panel">
-                    <div class="panel-title">Baguette magique</div>
-                    <div class="prop-row"><label>Tolérance</label><input type="range" id="wandTolerance" min="0" max="200" value="32" oninput="document.getElementById('wandTolNum').value=this.value"><input type="number" id="wandTolNum" value="32" onchange="document.getElementById('wandTolerance').value=this.value"></div>
-                    <p style="color:var(--text2);font-size:11px;">Sélectionnez l'outil Baguette (W) puis cliquez sur une image.</p>
-                </div>
-            </div>
+        <div class="message-feed" id="generalFeed"></div>
+        <div class="message-input-area">
+          <input type="text" class="message-input" placeholder="Message dans #général" id="generalInput">
+          <button class="send-btn" id="generalSend"><i data-lucide="send"></i></button>
         </div>
-    </div>
+      </div>
 
-    <!-- STATUSBAR -->
-    <div class="statusbar">
-        <span id="sizeInfo">2480 × 3508 px</span>
-        <span id="zoomInfo">100%</span>
-        <span id="toolInfo" style="margin-left:auto;">Outil : Déplacement</span>
-    </div>
+      <!-- Chat lancement-nova -->
+      <div id="chat-lancement-nova" class="chat-view" style="display:none;">
+        <div class="top-bar">
+          <button class="hamburger"><i data-lucide="menu"></i></button>
+          <div class="channel-header"><i data-lucide="hash"></i> lancement-nova</div>
+          <button class="close-view-btn" data-return="general"><i data-lucide="x"></i></button>
+        </div>
+        <div class="message-feed" id="novaFeed"><p class="empty-state">Bienvenue dans le canal lancement-nova.</p></div>
+        <div class="message-input-area"><input class="message-input" id="novaInput" placeholder="Message..."><button class="send-btn" id="novaSend"><i data-lucide="send"></i></button></div>
+      </div>
 
-    <!-- Loading overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <span style="color:#fff;font-size:14px;" id="loadingText">Chargement du modèle IA...</span>
-    </div>
+      <!-- Chat design-system -->
+      <div id="chat-design-system" class="chat-view" style="display:none;">
+        <div class="top-bar">
+          <button class="hamburger"><i data-lucide="menu"></i></button>
+          <div class="channel-header"><i data-lucide="hash"></i> design-system</div>
+          <button class="close-view-btn" data-return="general"><i data-lucide="x"></i></button>
+        </div>
+        <div class="message-feed" id="designFeed"><p class="empty-state">Discussions autour du design system.</p></div>
+        <div class="message-input-area"><input class="message-input" id="designInput" placeholder="Message..."><button class="send-btn" id="designSend"><i data-lucide="send"></i></button></div>
+      </div>
 
-    <input type="file" id="fileInput" accept="image/*" style="display:none">
+      <!-- DM views -->
+      <div id="dm-camille" class="chat-view" style="display:none;">
+        <div class="top-bar"><button class="hamburger"><i data-lucide="menu"></i></button><div class="channel-header"><span class="dm-avatar">CM</span> Camille M.</div><button class="close-view-btn" data-return="general"><i data-lucide="x"></i></button></div>
+        <div class="message-feed" id="camilleFeed"><p class="empty-state">Conversation avec Camille.</p></div>
+        <div class="message-input-area"><input class="message-input" id="camilleInput" placeholder="Message privé..."><button class="send-btn" id="camilleSend"><i data-lucide="send"></i></button></div>
+      </div>
+      <div id="dm-julien" class="chat-view" style="display:none;">
+        <div class="top-bar"><button class="hamburger"><i data-lucide="menu"></i></button><div class="channel-header"><span class="dm-avatar">JD</span> Julien D.</div><button class="close-view-btn" data-return="general"><i data-lucide="x"></i></button></div>
+        <div class="message-feed" id="julienFeed"><p class="empty-state">Conversation avec Julien.</p></div>
+        <div class="message-input-area"><input class="message-input" id="julienInput" placeholder="Message privé..."><button class="send-btn" id="julienSend"><i data-lucide="send"></i></button></div>
+      </div>
+      <div id="dm-sarah" class="chat-view" style="display:none;">
+        <div class="top-bar"><button class="hamburger"><i data-lucide="menu"></i></button><div class="channel-header"><span class="dm-avatar">SL</span> Sarah L.</div><button class="close-view-btn" data-return="general"><i data-lucide="x"></i></button></div>
+        <div class="message-feed" id="sarahFeed"><p class="empty-state">Conversation avec Sarah.</p></div>
+        <div class="message-input-area"><input class="message-input" id="sarahInput" placeholder="Message privé..."><button class="send-btn" id="sarahSend"><i data-lucide="send"></i></button></div>
+      </div>
 
-    <script type="module">
-        // ==================== INITIALISATION DU CANVAS ====================
-        const canvas = new fabric.Canvas('myCanvas', {
-            width: 2480,
-            height: 3508,
-            backgroundColor: '#ffffff',
-            preserveObjectStacking: true,
-            selection: true,
-            stopContextMenu: true,
-            fireRightClick: false,
-        });
+      <!-- Vues tâches -->
+      <div id="team-tasks" class="task-view">
+        <div class="top-bar"><button class="hamburger"><i data-lucide="menu"></i></button><h2 style="color:#fff;font-weight:600;font-size:1.1rem;">Tâches d'équipe</h2><button class="close-view-btn" data-return="general"><i data-lucide="x"></i></button></div>
+        <div class="task-card" onclick="this.classList.toggle('done')"><div class="task-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div><span class="task-title">Finaliser la landing page</span><span class="task-assignee">Camille</span></div>
+        <div class="task-card" onclick="this.classList.toggle('done')"><div class="task-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div><span class="task-title">Intégration API paiement</span><span class="task-assignee">Julien</span></div>
+        <div class="task-card done" onclick="this.classList.toggle('done')"><div class="task-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div><span class="task-title">Rédaction des emails</span><span class="task-assignee">Sarah</span></div>
+      </div>
+      <div id="my-tasks" class="task-view">
+        <div class="top-bar"><button class="hamburger"><i data-lucide="menu"></i></button><h2 style="color:#fff;font-weight:600;font-size:1.1rem;">Mes tâches</h2><button class="close-view-btn" data-return="general"><i data-lucide="x"></i></button></div>
+        <div class="task-card" onclick="this.classList.toggle('done')"><div class="task-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div><span class="task-title">Revoir le design system</span></div>
+        <div class="task-card done" onclick="this.classList.toggle('done')"><div class="task-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div><span class="task-title">Préparer la réunion de sprint</span></div>
+      </div>
+      <div id="files" class="task-view">
+        <div class="top-bar"><button class="hamburger"><i data-lucide="menu"></i></button><h2 style="color:#fff;font-weight:600;font-size:1.1rem;">Fichiers récents</h2><button class="close-view-btn" data-return="general"><i data-lucide="x"></i></button></div>
+        <div class="files-grid">
+          <div class="file-card"><i data-lucide="file-text" style="color:#818cf8;"></i><p style="font-size:0.75rem;">landing_v3.fig</p></div>
+          <div class="file-card"><i data-lucide="file-spreadsheet" style="color:#34d399;"></i><p style="font-size:0.75rem;">roadmap.xlsx</p></div>
+          <div class="file-card"><i data-lucide="file-code" style="color:#f59e0b;"></i><p style="font-size:0.75rem;">index.ts</p></div>
+        </div>
+      </div>
+    </main>
 
-        let currentTool = 'select';
-        let isDrawing = false;
-        let startX, startY, shape;
-        let rawTimeout = null;
-        let originalImageData = null;
+    <!-- Panneau de thread -->
+    <aside class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <i data-lucide="message-square"></i> Fil de discussion
+        <i data-lucide="x" id="closeThreadBtn" style="margin-left:auto;cursor:pointer;"></i>
+      </div>
+      <div class="detail-thread" id="threadContent"><p class="empty-state">Cliquez sur "Répondre" pour ouvrir un fil.</p></div>
+      <div class="thread-input"><input type="text" id="threadInput" placeholder="Répondre..."><button class="send-btn" id="threadSend" style="width:36px;height:36px;"><i data-lucide="send" style="width:14px;height:14px;"></i></button></div>
+    </aside>
+  </div>
 
-        // Damier de transparence
-        const checkerboard = document.createElement('canvas');
-        checkerboard.width = 40;
-        checkerboard.height = 40;
-        const ctxCB = checkerboard.getContext('2d');
-        ctxCB.fillStyle = '#ffffff';
-        ctxCB.fillRect(0, 0, 40, 40);
-        ctxCB.fillStyle = '#e0e0e0';
-        ctxCB.fillRect(0, 0, 20, 20);
-        ctxCB.fillRect(20, 20, 20, 20);
-        canvas.setOverlayImage(checkerboard, canvas.renderAll.bind(canvas), { scaleX: 1, scaleY: 1, offsetX: 0, offsetY: 0 });
+  <script>
+    (() => {
+      lucide.createIcons();
+      const $ = (s) => document.querySelector(s), $$ = (s) => document.querySelectorAll(s);
+      const sidebar = $('#sidebar'), overlay = $('#sidebarOverlay'), detailPanel = $('#detailPanel'), threadContent = $('#threadContent');
+      const messagesStore = { general: [{ author: 'Camille M.', avatar: 'CM', text: 'Nouvelle version des maquettes disponible sur Figma.', time: '10:32', reactions: ['👍', '❤️'] }, { author: 'Julien D.', avatar: 'JD', text: 'Parfait, je les intègre cet après-midi.', time: '10:35', reactions: ['✅'] }, { author: 'Sarah L.', avatar: 'SL', text: 'Les contenus sont prêts, je les envoie sur le canal design.', time: '10:41', reactions: [] }], nova: [], design: [], camille: [], julien: [], sarah: [] };
+      const channelConfig = { general: 'generalFeed', nova: 'novaFeed', design: 'designFeed', camille: 'camilleFeed', julien: 'julienFeed', sarah: 'sarahFeed' };
+      const inputConfig = { general: 'generalInput', nova: 'novaInput', design: 'designInput', camille: 'camilleInput', julien: 'julienInput', sarah: 'sarahInput' };
 
-        // ==================== VIEWPORT ====================
-        function fitCanvas() {
-            const wrap = document.getElementById('canvasWrapper');
-            const w = wrap.clientWidth;
-            const h = wrap.clientHeight;
-            const scale = Math.min(w / canvas.width, h / canvas.height, 0.3);
-            canvas.setViewportTransform([scale, 0, 0, scale, (w - canvas.width * scale) / 2, (h - canvas.height * scale) /
-                2
-            ]);
-            canvas.renderAll();
-            updateStatus();
-        }
-        window.addEventListener('resize', fitCanvas);
-        fitCanvas();
+      const createMsg = (m) => { const d = document.createElement('div'); d.className = 'message'; d.innerHTML = `<div class="msg-avatar">${m.avatar}</div><div class="msg-body"><div class="msg-author">${m.author} <span class="msg-time">${m.time}</span></div><div class="msg-text">${m.text}</div><div class="msg-actions"><button class="msg-action-btn reply-btn"><i data-lucide="corner-down-right"></i> Répondre</button><button class="msg-action-btn react-btn"><i data-lucide="smile"></i> Réagir</button>${m.reactions.map(r => `<span class="reaction-badge">${r}</span>`).join('')}</div></div>`; return d; };
+      const attachEvents = (el) => { el.querySelector('.reply-btn')?.addEventListener('click', (e) => { e.stopPropagation(); openThread(el); }); el.querySelector('.react-btn')?.addEventListener('click', (e) => { e.stopPropagation(); const b = document.createElement('span'); b.className = 'reaction-badge'; b.textContent = '👋'; el.querySelector('.msg-actions').appendChild(b); }); };
+      const renderFeed = (id, msgs) => { const f = document.getElementById(id); if (!f) return; f.innerHTML = msgs.length ? '' : '<p class="empty-state">Aucun message pour le moment.</p>'; msgs.forEach(m => { const e = createMsg(m); f.appendChild(e); attachEvents(e); }); lucide.createIcons(); f.scrollTop = f.scrollHeight; };
+      const sendMsg = (key) => { const inp = document.getElementById(inputConfig[key]); const text = inp?.value.trim(); if (text) { messagesStore[key].push({ author: 'Vous', avatar: 'VO', text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), reactions: [] }); inp.value = ''; renderFeed(channelConfig[key], messagesStore[key]); } };
 
-        canvas.on('mouse:wheel', function(opt) {
-            const delta = opt.e.deltaY;
-            let zoom = canvas.getZoom();
-            zoom *= 0.999 ** delta;
-            zoom = Math.min(5, Math.max(0.05, zoom));
-            canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
-            opt.e.preventDefault();
-            opt.e.stopPropagation();
-            updateStatus();
-        });
+      Object.keys(channelConfig).forEach(k => { document.getElementById(k + 'Send')?.addEventListener('click', () => sendMsg(k)); document.getElementById(inputConfig[k])?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMsg(k); }); });
 
-        // Outil Main
-        canvas.on('mouse:down', function(opt) {
-            if (currentTool !== 'hand') return;
-            canvas.isDragging = true;
-            canvas.selection = false;
-            canvas.defaultCursor = 'grabbing';
-        });
-        canvas.on('mouse:move', function(opt) {
-            if (canvas.isDragging && currentTool === 'hand') {
-                const vpt = canvas.viewportTransform;
-                vpt[4] += opt.e.movementX;
-                vpt[5] += opt.e.movementY;
-                canvas.setViewportTransform(vpt);
-                canvas.renderAll();
-            }
-        });
-        canvas.on('mouse:up', function() {
-            canvas.isDragging = false;
-            if (currentTool === 'hand') canvas.defaultCursor = 'grab';
-            updateStatus();
-        });
+      const closeSidebar = () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); };
+      const openSidebar = () => { sidebar.classList.add('open'); overlay.classList.add('active'); };
+      $$('.hamburger').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); }));
+      overlay.addEventListener('click', closeSidebar);
+      document.addEventListener('click', (e) => { if (window.innerWidth <= 767 && !sidebar.contains(e.target) && !e.target.closest('.hamburger') && sidebar.classList.contains('open')) closeSidebar(); });
 
-        // ==================== OUTILS ====================
-        function setTool(tool) {
-            currentTool = tool;
-            document.querySelector('.tool-btn.active')?.classList.remove('active');
-            const btn = document.querySelector(`.tool-btn[data-tool="${tool}"]`);
-            if (btn) btn.classList.add('active');
-            canvas.isDrawingMode = false;
-            canvas.selection = (tool === 'select');
-            canvas.defaultCursor = tool === 'hand' ? 'grab' : tool === 'wand' ? 'crosshair' : 'default';
-            canvas.hoverCursor = tool === 'hand' ? 'grab' : 'move';
-            if (tool === 'brush') {
-                canvas.isDrawingMode = true;
-                canvas.freeDrawingBrush.width = 10;
-                canvas.freeDrawingBrush.color = document.getElementById('fillColor').value;
-            }
-            document.getElementById('toolInfo').textContent = 'Outil : ' + tool;
-        }
+      const hideAll = () => { $$('.chat-view').forEach(v => v.style.display = 'none'); $$('.task-view').forEach(v => v.classList.remove('active')); };
+      const showChat = (id) => { hideAll(); const el = document.getElementById(id); if (el) el.style.display = 'flex'; closeSidebar(); };
+      const showTask = (id) => { hideAll(); const el = document.getElementById(id); if (el) el.classList.add('active'); closeSidebar(); };
+      const returnToGeneral = () => { $$('.channel-item, .dm-item, .task-item').forEach(i => i.classList.remove('active')); $('.channel-item[data-channel="general"]').classList.add('active'); showChat('chat-general'); renderFeed('generalFeed', messagesStore.general); };
+      const setActive = (items, active) => { items.forEach(i => i.classList.remove('active')); active.classList.add('active'); };
 
-        document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
-            b.addEventListener('click', () => setTool(b.dataset.tool));
-        });
+      $$('.close-view-btn').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); if (b.dataset.return === 'general') returnToGeneral(); }));
+      $$('.channel-item').forEach(b => b.addEventListener('click', () => { setActive([...$$('.channel-item, .dm-item, .task-item')], b); const ch = b.dataset.channel; const key = ch === 'lancement-nova' ? 'nova' : ch === 'design-system' ? 'design' : ch; showChat('chat-' + ch); renderFeed(channelConfig[key], messagesStore[key]); }));
+      $$('.dm-item').forEach(b => b.addEventListener('click', () => { setActive([...$$('.channel-item, .dm-item, .task-item')], b); const dm = b.dataset.dm; showChat('dm-' + dm); renderFeed(channelConfig[dm], messagesStore[dm]); }));
+      $$('.task-item').forEach(b => b.addEventListener('click', () => { setActive([...$$('.channel-item, .dm-item, .task-item')], b); showTask(b.dataset.view); }));
+      $('#newMessageBtn').addEventListener('click', () => $$('.dm-item')[0].click());
 
-        // Raccourcis
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            const key = e.key.toLowerCase();
-            if (e.ctrlKey && key === 'z') { e.preventDefault();
-                undo(); return; }
-            if (e.ctrlKey && key === 'y') { e.preventDefault();
-                redo(); return; }
-            if (key === 'delete' || key === 'backspace') { deleteSelected(); return; }
-            switch (key) {
-                case 'v':
-                    setTool('select');
-                    break;
-                case 'r':
-                    setTool('rectangle');
-                    break;
-                case 'c':
-                    setTool('ellipse');
-                    break;
-                case 'l':
-                    setTool('line');
-                    break;
-                case 't':
-                    setTool('text');
-                    break;
-                case 'b':
-                    setTool('brush');
-                    break;
-                case 'e':
-                    setTool('eraser');
-                    break;
-                case 'w':
-                    setTool('wand');
-                    break;
-                case 'i':
-                    setTool('eyedropper');
-                    break;
-                case 'h':
-                    setTool('hand');
-                    break;
-                case 'z':
-                    setTool('zoom');
-                    break;
-            }
-        });
+      const openThread = (msgEl) => { detailPanel.classList.add('open'); const author = msgEl.querySelector('.msg-author')?.childNodes[0]?.textContent?.trim() || 'Message'; threadContent.innerHTML = `<div class="thread-message"><strong>${author}</strong><br>Discussion sur ce message.</div>`; };
+      const closeThread = () => detailPanel.classList.remove('open');
+      $('#closeThreadBtn').addEventListener('click', (e) => { e.stopPropagation(); closeThread(); });
+      document.addEventListener('click', (e) => { if (detailPanel.classList.contains('open') && !detailPanel.contains(e.target) && !e.target.closest('.reply-btn')) closeThread(); });
+      detailPanel.addEventListener('click', (e) => e.stopPropagation());
 
-        // ==================== CRÉATION D'OBJETS ====================
-        canvas.on('mouse:down', function(opt) {
-            if (['select', 'hand', 'zoom', 'eyedropper', 'eraser', 'brush', 'wand'].includes(currentTool)) return;
-            if (currentTool === 'delete') { deleteSelected(); return; }
-            const pointer = canvas.getPointer(opt.e);
-            startX = pointer.x;
-            startY = pointer.y;
-            isDrawing = true;
-            if (currentTool === 'text') {
-                const txt = new fabric.IText('Texte', {
-                    left: startX,
-                    top: startY,
-                    fontFamily: 'Arial',
-                    fontSize: 120,
-                    fill: document.getElementById('fillColor').value,
-                    opacity: parseFloat(document.getElementById('opacity').value),
-                });
-                canvas.add(txt);
-                canvas.setActiveObject(txt);
-                txt.enterEditing();
-                saveState();
-                updateLayersPanel();
-                isDrawing = false;
-            } else {
-                const fill = document.getElementById('fillColor').value;
-                const stroke = document.getElementById('strokeColor').value;
-                const sw = parseInt(document.getElementById('strokeWidth').value);
-                const op = parseFloat(document.getElementById('opacity').value);
-                switch (currentTool) {
-                    case 'rectangle':
-                        shape = new fabric.Rect({ left: startX, top: startY, width: 0, height: 0, fill, stroke,
-                            strokeWidth: sw, opacity: op });
-                        break;
-                    case 'ellipse':
-                        shape = new fabric.Ellipse({ left: startX, top: startY, rx: 0, ry: 0, fill, stroke,
-                            strokeWidth: sw, opacity: op });
-                        break;
-                    case 'line':
-                        shape = new fabric.Line([startX, startY, startX, startY], { stroke: fill, strokeWidth: sw,
-                            opacity: op });
-                        break;
-                }
-                if (shape) { canvas.add(shape);
-                    canvas.setActiveObject(shape); }
-            }
-        });
+      const threadSend = $('#threadSend'), threadInput = $('#threadInput');
+      threadSend?.addEventListener('click', () => { const t = threadInput.value.trim(); if (t) { const m = document.createElement('div'); m.className = 'thread-message'; m.innerHTML = `<strong>Vous</strong><br>${t}`; threadContent.appendChild(m); threadInput.value = ''; threadContent.scrollTop = threadContent.scrollHeight; } });
+      threadInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') threadSend.click(); });
 
-        canvas.on('mouse:move', function(opt) {
-            if (!isDrawing || !shape) return;
-            const pointer = canvas.getPointer(opt.e);
-            if (currentTool === 'rectangle' || currentTool === 'ellipse') {
-                const w = pointer.x - startX;
-                const h = pointer.y - startY;
-                if (currentTool === 'rectangle') shape.set({ width: Math.abs(w), height: Math.abs(h), left: w > 0 ?
-                        startX : pointer.x, top: h > 0 ? startY : pointer.y });
-                else shape.set({ rx: Math.abs(w) / 2, ry: Math.abs(h) / 2, left: Math.min(startX, pointer.x), top: Math
-                        .min(startY, pointer.y) });
-                canvas.renderAll();
-            } else if (currentTool === 'line') { shape.set({ x2: pointer.x, y2: pointer.y });
-                canvas.renderAll(); }
-        });
+      let tx = 0;
+      detailPanel.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+      detailPanel.addEventListener('touchmove', (e) => { if (e.touches[0].clientX - tx > 50 && detailPanel.classList.contains('open')) closeThread(); }, { passive: true });
 
-        canvas.on('mouse:up', function() {
-            if (isDrawing && shape) {
-                if ((currentTool === 'rectangle' && shape.width < 2 && shape.height < 2) || (currentTool ===
-                        'ellipse' && shape.rx < 2 && shape.ry < 2) || (currentTool === 'line' && Math.hypot(shape.x2 -
-                        shape.x1, shape.y2 - shape.y1) < 2)) { canvas.remove(shape); } else { saveState();
-                    updateLayersPanel(); }
-                shape = null;
-            }
-            isDrawing = false;
-        });
-
-        // Gomme
-        canvas.on('mouse:down', function(opt) {
-            if (currentTool !== 'eraser') return;
-            const pointer = canvas.getPointer(opt.e);
-            const objects = canvas.getObjects();
-            for (let i = objects.length - 1; i >= 0; i--) {
-                if (objects[i].containsPoint(pointer)) { canvas.remove(objects[i]);
-                    saveState();
-                    updateLayersPanel(); break; }
-            }
-        });
-
-        // Pipette
-        canvas.on('mouse:down', function(opt) {
-            if (currentTool !== 'eyedropper') return;
-            const pointer = canvas.getPointer(opt.e);
-            const ctx = canvas.getContext();
-            const pixel = ctx.getImageData(pointer.x * canvas.getZoom(), pointer.y * canvas.getZoom(), 1, 1).data;
-            const hex = '#' + ((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1);
-            document.getElementById('fillColor').value = hex;
-        });
-
-        // Zoom
-        canvas.on('mouse:down', function(opt) {
-            if (currentTool !== 'zoom') return;
-            const point = { x: opt.e.offsetX, y: opt.e.offsetY };
-            const zoom = opt.e.altKey ? canvas.getZoom() * 0.8 : canvas.getZoom() * 1.25;
-            canvas.zoomToPoint(point, Math.min(5, Math.max(0.05, zoom)));
-            updateStatus();
-        });
-
-        // Baguette magique
-        canvas.on('mouse:down', function(opt) {
-            if (currentTool !== 'wand') return;
-            const obj = canvas.getActiveObject();
-            if (!obj || obj.type !== 'image') { alert(
-                'Sélectionnez d\'abord une image importée avec l\'outil Déplacement, puis utilisez la Baguette magique.'
-                ); return; }
-            const pointer = canvas.getPointer(opt.e);
-            const imgElement = obj._element;
-            if (!imgElement) return;
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = imgElement.naturalWidth;
-            tempCanvas.height = imgElement.naturalHeight;
-            const tctx = tempCanvas.getContext('2d');
-            tctx.drawImage(imgElement, 0, 0);
-            const scaleX = obj.scaleX || 1;
-            const scaleY = obj.scaleY || 1;
-            const imgX = Math.round((pointer.x - obj.left) / scaleX);
-            const imgY = Math.round((pointer.y - obj.top) / scaleY);
-            if (imgX < 0 || imgY < 0 || imgX >= tempCanvas.width || imgY >= tempCanvas.height) return;
-            const imageData = tctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-            const tolerance = parseInt(document.getElementById('wandTolerance').value);
-            const mask = floodFill(imageData, imgX, imgY, tolerance);
-            if (!mask) return;
-            const maskCanvas = document.createElement('canvas');
-            maskCanvas.width = tempCanvas.width;
-            maskCanvas.height = tempCanvas.height;
-            const mctx = maskCanvas.getContext('2d');
-            const newData = mctx.createImageData(tempCanvas.width, tempCanvas.height);
-            for (let i = 0; i < mask.length; i++) {
-                const idx = i * 4;
-                if (mask[i]) { newData.data[idx] = imageData.data[idx];
-                    newData.data[idx + 1] = imageData.data[idx + 1];
-                    newData.data[idx + 2] = imageData.data[idx + 2];
-                    newData.data[idx + 3] = 255; } else { newData.data[idx + 3] = 0; }
-            }
-            mctx.putImageData(newData, 0, 0);
-            const url = maskCanvas.toDataURL();
-            fabric.Image.fromURL(url, (maskImg) => {
-                maskImg.set({ left: obj.left, top: obj.top, scaleX: obj.scaleX, scaleY: obj.scaleY, opacity: 0.7,
-                    name: 'Masque' });
-                canvas.add(maskImg);
-                canvas.setActiveObject(maskImg);
-                saveState();
-                updateLayersPanel();
-            });
-        });
-
-        function floodFill(imageData, startX, startY, tolerance) {
-            const w = imageData.width;
-            const h = imageData.height;
-            const data = imageData.data;
-            const visited = new Uint8Array(w * h);
-            const mask = new Uint8Array(w * h);
-            const stack = [startX, startY];
-            const startIdx = (startY * w + startX) * 4;
-            const startR = data[startIdx];
-            const startG = data[startIdx + 1];
-            const startB = data[startIdx + 2];
-            while (stack.length > 0) {
-                const y = stack.pop();
-                const x = stack.pop();
-                const idx = y * w + x;
-                if (x < 0 || x >= w || y < 0 || y >= h || visited[idx]) continue;
-                visited[idx] = 1;
-                const pidx = idx * 4;
-                const dr = Math.abs(data[pidx] - startR);
-                const dg = Math.abs(data[pidx + 1] - startG);
-                const db = Math.abs(data[pidx + 2] - startB);
-                if (dr + dg + db <= tolerance * 3) {
-                    mask[idx] = 1;
-                    stack.push(x - 1, y, x + 1, y, x, y - 1, x, y + 1);
-                }
-            }
-            return mask;
-        }
-
-        // ==================== SÉLECTION ET PROPRIÉTÉS ====================
-        canvas.on('selection:created', updatePropsPanel);
-        canvas.on('selection:updated', updatePropsPanel);
-        canvas.on('selection:cleared', resetPropsPanel);
-
-        function updatePropsPanel() {
-            const obj = canvas.getActiveObject();
-            if (!obj) return;
-            document.getElementById('fillColor').value = obj.fill || '#000000';
-            document.getElementById('strokeColor').value = obj.stroke || '#000000';
-            const sw = obj.strokeWidth || 0;
-            document.getElementById('strokeWidth').value = sw;
-            document.getElementById('strokeWidthNum').value = sw;
-            const op = obj.opacity ?? 1;
-            document.getElementById('opacity').value = op;
-            document.getElementById('opacityVal').textContent = Math.round(op * 100) + '%';
-        }
-
-        function resetPropsPanel() {
-            document.getElementById('fillColor').value = '#cc0000';
-            document.getElementById('strokeColor').value = '#000000';
-            document.getElementById('strokeWidth').value = 2;
-            document.getElementById('strokeWidthNum').value = 2;
-            document.getElementById('opacity').value = 1;
-            document.getElementById('opacityVal').textContent = '100%';
-        }
-
-        function updateProp(prop, value) {
-            const obj = canvas.getActiveObject();
-            if (!obj) return;
-            switch (prop) {
-                case 'fill':
-                    obj.set('fill', value);
-                    break;
-                case 'stroke':
-                    obj.set('stroke', value);
-                    break;
-                case 'strokeWidth':
-                    const sw = parseInt(value);
-                    obj.set('strokeWidth', sw);
-                    document.getElementById('strokeWidthNum').value = sw;
-                    break;
-                case 'opacity':
-                    const op = parseFloat(value);
-                    obj.set('opacity', op);
-                    document.getElementById('opacityVal').textContent = Math.round(op * 100) + '%';
-                    break;
-            }
-            canvas.renderAll();
-            saveState();
-        }
-
-        // ==================== CAMERA RAW ====================
-        function rawSliderChanged() {
-            const pairs = [
-                ['rawTemp', 'rawTempNum'],
-                ['rawTint', 'rawTintNum'],
-                ['rawExposure', 'rawExpNum'],
-                ['rawContrast', 'rawContrastNum'],
-                ['rawHighlights', 'rawHighNum'],
-                ['rawShadows', 'rawShaNum'],
-                ['rawWhites', 'rawWhiNum'],
-                ['rawBlacks', 'rawBlaNum'],
-                ['rawClarity', 'rawClaNum'],
-                ['rawVibrance', 'rawVibNum'],
-                ['rawSaturation', 'rawSatNum']
-            ];
-            pairs.forEach(([sliderId, numId]) => {
-                document.getElementById(numId).value = document.getElementById(sliderId).value;
-            });
-            if (rawTimeout) clearTimeout(rawTimeout);
-            rawTimeout = setTimeout(applyRawToSelected, 200);
-        }
-
-        function rawNumChanged() {
-            const pairs = [
-                ['rawTemp', 'rawTempNum'],
-                ['rawTint', 'rawTintNum'],
-                ['rawExposure', 'rawExpNum'],
-                ['rawContrast', 'rawContrastNum'],
-                ['rawHighlights', 'rawHighNum'],
-                ['rawShadows', 'rawShaNum'],
-                ['rawWhites', 'rawWhiNum'],
-                ['rawBlacks', 'rawBlaNum'],
-                ['rawClarity', 'rawClaNum'],
-                ['rawVibrance', 'rawVibNum'],
-                ['rawSaturation', 'rawSatNum']
-            ];
-            pairs.forEach(([sliderId, numId]) => {
-                document.getElementById(sliderId).value = document.getElementById(numId).value;
-            });
-            if (rawTimeout) clearTimeout(rawTimeout);
-            rawTimeout = setTimeout(applyRawToSelected, 200);
-        }
-
-        function applyRawToSelected() {
-            const obj = canvas.getActiveObject();
-            if (!obj || obj.type !== 'image') { return; }
-            const imgElement = obj._element;
-            if (!imgElement) return;
-            if (!originalImageData) {
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = imgElement.naturalWidth;
-                tempCanvas.height = imgElement.naturalHeight;
-                const tctx = tempCanvas.getContext('2d');
-                tctx.drawImage(imgElement, 0, 0);
-                originalImageData = tctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-            }
-            const imageData = new ImageData(new Uint8ClampedArray(originalImageData.data), originalImageData.width,
-                originalImageData.height);
-            const temp = parseFloat(document.getElementById('rawTemp').value);
-            const tint = parseFloat(document.getElementById('rawTint').value);
-            const exposure = parseFloat(document.getElementById('rawExposure').value);
-            const contrast = parseFloat(document.getElementById('rawContrast').value) / 100;
-            const highlights = parseFloat(document.getElementById('rawHighlights').value) / 100;
-            const shadows = parseFloat(document.getElementById('rawShadows').value) / 100;
-            const whites = parseFloat(document.getElementById('rawWhites').value) / 100;
-            const blacks = parseFloat(document.getElementById('rawBlacks').value) / 100;
-            const clarity = parseFloat(document.getElementById('rawClarity').value) / 100;
-            const vibrance = parseFloat(document.getElementById('rawVibrance').value) / 100;
-            const saturation = parseFloat(document.getElementById('rawSaturation').value) / 100;
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i],
-                    g = data[i + 1],
-                    b = data[i + 2];
-                // Température
-                r = Math.min(255, Math.max(0, r + temp * 0.5));
-                b = Math.min(255, Math.max(0, b - temp * 0.5));
-                // Teinte
-                r = Math.min(255, Math.max(0, r + tint * 0.3));
-                g = Math.min(255, Math.max(0, g - tint * 0.15));
-                // Exposition
-                const expFactor = Math.pow(2, exposure);
-                r = Math.min(255, r * expFactor);
-                g = Math.min(255, g * expFactor);
-                b = Math.min(255, b * expFactor);
-                // Contraste
-                const cf = (1 + contrast) / (1 - contrast);
-                r = ((r / 255 - 0.5) * cf + 0.5) * 255;
-                g = ((g / 255 - 0.5) * cf + 0.5) * 255;
-                b = ((b / 255 - 0.5) * cf + 0.5) * 255;
-                // Highlights / Shadows
-                const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                if (lum > 128) { r += highlights * (255 - r) * 0.5;
-                    g += highlights * (255 - g) * 0.5;
-                    b += highlights * (255 - b) * 0.5; } else { r += shadows * r * 0.5;
-                    g += shadows * g * 0.5;
-                    b += shadows * b * 0.5; }
-                // Whites / Blacks
-                r += whites * (255 - r) * 0.3;
-                g += whites * (255 - g) * 0.3;
-                b += whites * (255 - b) * 0.3;
-                r -= blacks * r * 0.3;
-                g -= blacks * g * 0.3;
-                b -= blacks * b * 0.3;
-                // Saturation
-                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-                r = gray + (r - gray) * (1 + saturation);
-                g = gray + (g - gray) * (1 + saturation);
-                b = gray + (b - gray) * (1 + saturation);
-                // Vibrance
-                const maxC = Math.max(r, g, b) - Math.min(r, g, b);
-                const vibranceFactor = maxC < 128 ? 1 + vibrance : 1 + vibrance * 0.3;
-                r = gray + (r - gray) * vibranceFactor;
-                g = gray + (g - gray) * vibranceFactor;
-                b = gray + (b - gray) * vibranceFactor;
-                // Clarté (simplifiée)
-                const clarityAmount = clarity * 30;
-                r += clarityAmount;
-                g += clarityAmount;
-                b += clarityAmount;
-                data[i] = Math.min(255, Math.max(0, r));
-                data[i + 1] = Math.min(255, Math.max(0, g));
-                data[i + 2] = Math.min(255, Math.max(0, b));
-            }
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = imageData.width;
-            tempCanvas.height = imageData.height;
-            tempCanvas.getContext('2d').putImageData(imageData, 0, 0);
-            const url = tempCanvas.toDataURL();
-            fabric.Image.fromURL(url, (newImg) => {
-                newImg.set({ left: obj.left, top: obj.top, scaleX: obj.scaleX, scaleY: obj.scaleY });
-                const idx = canvas.getObjects().indexOf(obj);
-                canvas.remove(obj);
-                canvas.insertAt(newImg, idx);
-                canvas.setActiveObject(newImg);
-                canvas.renderAll();
-                saveState();
-                updateLayersPanel();
-            });
-        }
-
-        // ==================== IA ====================
-        async function loadBgRemoval() {
-            const mod = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm');
-            return mod;
-        }
-
-        async function aiRemoveBackground() {
-            const obj = canvas.getActiveObject();
-            if (!obj || obj.type !== 'image') { alert('Sélectionnez une image importée.'); return; }
-            const imgElement = obj._element;
-            if (!imgElement) return;
-            const overlay = document.getElementById('loadingOverlay');
-            const loadingText = document.getElementById('loadingText');
-            overlay.classList.add('show');
-            loadingText.textContent = 'Chargement du modèle IA (première fois ≈ 80 Mo)...';
-            try {
-                const { removeBackground } = await loadBgRemoval();
-                loadingText.textContent = 'Détourage en cours...';
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = imgElement.naturalWidth;
-                tempCanvas.height = imgElement.naturalHeight;
-                tempCanvas.getContext('2d').drawImage(imgElement, 0, 0);
-                const blob = await new Promise(r => tempCanvas.toBlob(r, 'image/png'));
-                const resultBlob = await removeBackground(blob);
-                const url = URL.createObjectURL(resultBlob);
-                fabric.Image.fromURL(url, (newImg) => {
-                    newImg.set({ left: obj.left, top: obj.top, scaleX: obj.scaleX, scaleY: obj.scaleY, name: obj
-                            .name + ' (détouré)' });
-                    canvas.add(newImg);
-                    canvas.setActiveObject(newImg);
-                    canvas.renderAll();
-                    saveState();
-                    updateLayersPanel();
-                    document.getElementById('aiStatus').textContent = '✅ Détourage terminé.';
-                });
-            } catch (err) {
-                alert('Erreur IA : ' + err.message);
-                document.getElementById('aiStatus').textContent = '❌ Erreur : ' + err.message;
-            }
-            overlay.classList.remove('show');
-        }
-
-        async function aiDetectSubject() {
-            const obj = canvas.getActiveObject();
-            if (!obj || obj.type !== 'image') { alert('Sélectionnez une image importée.'); return; }
-            const imgElement = obj._element;
-            if (!imgElement) return;
-            const overlay = document.getElementById('loadingOverlay');
-            const loadingText = document.getElementById('loadingText');
-            overlay.classList.add('show');
-            loadingText.textContent = 'Chargement du modèle IA...';
-            try {
-                const { segmentForeground } = await loadBgRemoval();
-                loadingText.textContent = 'Détection du sujet...';
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = imgElement.naturalWidth;
-                tempCanvas.height = imgElement.naturalHeight;
-                tempCanvas.getContext('2d').drawImage(imgElement, 0, 0);
-                const blob = await new Promise(r => tempCanvas.toBlob(r, 'image/png'));
-                const maskBlob = await segmentForeground(blob);
-                const url = URL.createObjectURL(maskBlob);
-                fabric.Image.fromURL(url, (maskImg) => {
-                    maskImg.set({ left: obj.left, top: obj.top, scaleX: obj.scaleX, scaleY: obj.scaleY,
-                        opacity: 0.8, name: 'Masque IA' });
-                    canvas.add(maskImg);
-                    canvas.setActiveObject(maskImg);
-                    canvas.renderAll();
-                    saveState();
-                    updateLayersPanel();
-                    document.getElementById('aiStatus').textContent =
-                        '✅ Masque créé (blanc = sujet).';
-                });
-            } catch (err) {
-                alert('Erreur IA : ' + err.message);
-                document.getElementById('aiStatus').textContent = '❌ Erreur : ' + err.message;
-            }
-            overlay.classList.remove('show');
-        }
-
-        // ==================== CALQUES ====================
-        function updateLayersPanel() {
-            const list = document.getElementById('layersList');
-            const objects = canvas.getObjects();
-            let html = '';
-            for (let i = objects.length - 1; i >= 0; i--) {
-                const obj = objects[i];
-                const name = obj.name || (obj.type === 'i-text' ? (obj.text?.slice(0, 20) || 'Texte') : (obj.type ||
-                    'Objet'));
-                const active = canvas.getActiveObject() === obj;
-                const vis = obj.visible !== false;
-                html += `
-                <div class="layer-item ${active ? 'selected' : ''}" data-index="${i}" onclick="selectLayer(${i})">
-                    <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3z" fill="currentColor"/></svg>
-                    <span class="layer-name">${name}</span>
-                    <span class="layer-vis ${vis ? '' : 'hidden'}" onclick="event.stopPropagation();toggleLayerVis(${i})">
-                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/></svg>
-                    </span>
-                    <span class="layer-del" onclick="event.stopPropagation();deleteLayer(${i})">
-                        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/></svg>
-                    </span>
-                </div>`;
-            }
-            list.innerHTML = html || '<div style="color:#666;padding:10px;">Aucun calque</div>';
-        }
-
-        function selectLayer(index) {
-            const obj = canvas.getObjects()[index];
-            if (obj) { canvas.setActiveObject(obj);
-                canvas.renderAll();
-                updateLayersPanel(); }
-        }
-
-        function toggleLayerVis(index) {
-            const obj = canvas.getObjects()[index];
-            if (obj) { obj.visible = !obj.visible;
-                canvas.renderAll();
-                updateLayersPanel(); }
-        }
-
-        function deleteLayer(index) {
-            const obj = canvas.getObjects()[index];
-            if (obj) { canvas.remove(obj);
-                saveState();
-                updateLayersPanel(); }
-        }
-
-        function moveLayerUp() {
-            const obj = canvas.getActiveObject();
-            if (!obj) return;
-            const objects = canvas.getObjects();
-            const idx = objects.indexOf(obj);
-            if (idx < objects.length - 1) { canvas.moveTo(obj, idx + 1);
-                saveState();
-                updateLayersPanel(); }
-        }
-
-        function moveLayerDown() {
-            const obj = canvas.getActiveObject();
-            if (!obj) return;
-            const objects = canvas.getObjects();
-            const idx = objects.indexOf(obj);
-            if (idx > 0) { canvas.moveTo(obj, idx - 1);
-                saveState();
-                updateLayersPanel(); }
-        }
-
-        function duplicateLayer() {
-            const obj = canvas.getActiveObject();
-            if (!obj) return;
-            obj.clone(cloned => {
-                cloned.set({ left: obj.left + 30, top: obj.top + 30, name: (obj.name || '') + ' (copie)' });
-                canvas.add(cloned);
-                canvas.setActiveObject(cloned);
-                saveState();
-                updateLayersPanel();
-            });
-        }
-
-        // ==================== ONGLETS ====================
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector(`.tab-btn:nth-child(${['layers','properties','raw','ai'].indexOf(tabName)+1})`)
-                ?.classList.add('active');
-            const content = document.getElementById('tab-' + tabName);
-            if (content) content.classList.add('active');
-        }
-        window.switchTab = switchTab;
-
-        // ==================== HISTORIQUE ====================
-        const history = [];
-        let historyIndex = -1;
-        const MAX_HIST = 60;
-
-        function saveState() {
-            if (historyIndex < history.length - 1) history.splice(historyIndex + 1);
-            history.push(JSON.stringify(canvas.toDatalessJSON()));
-            if (history.length > MAX_HIST) history.shift();
-            historyIndex = history.length - 1;
-        }
-
-        function undo() {
-            if (historyIndex <= 0) return;
-            historyIndex--;
-            loadState(history[historyIndex]);
-        }
-
-        function redo() {
-            if (historyIndex >= history.length - 1) return;
-            historyIndex++;
-            loadState(history[historyIndex]);
-        }
-
-        function loadState(json) {
-            canvas.loadFromJSON(json, () => { canvas.renderAll();
-                updateLayersPanel();
-                updateStatus(); });
-        }
-        canvas.on('object:added', () => saveState());
-        canvas.on('object:removed', () => saveState());
-        canvas.on('object:modified', () => saveState());
-        saveState();
-
-        // ==================== FONCTIONS ANNEXES ====================
-        function deleteSelected() {
-            const obj = canvas.getActiveObject();
-            if (obj) { canvas.remove(obj);
-                canvas.discardActiveObject();
-                saveState();
-                updateLayersPanel(); }
-        }
-
-        function newDocument() {
-            if (confirm('Créer un nouveau document ?')) { canvas.clear();
-                canvas.backgroundColor = '#ffffff';
-                originalImageData = null;
-                saveState();
-                updateLayersPanel();
-                fitCanvas(); }
-        }
-
-        function openFile() { document.getElementById('fileInput').click(); }
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                fabric.Image.fromURL(ev.target.result, img => {
-                    img.scaleToWidth(canvas.width * 0.6);
-                    img.set({ left: 100, top: 100, name: file.name });
-                    canvas.add(img);
-                    canvas.setActiveObject(img);
-                    originalImageData = null;
-                    saveState();
-                    updateLayersPanel();
-                });
-            };
-            reader.readAsDataURL(file);
-            this.value = '';
-        });
-
-        function exportImage(format) {
-            const dataURL = canvas.toDataURL({ format, quality: 1.0, multiplier: 1 });
-            const link = document.createElement('a');
-            link.href = dataURL;
-            link.download = `poster.${format}`;
-            link.click();
-        }
-
-        function resizeCanvas() {
-            const w = parseInt(document.getElementById('canvasW').value);
-            const h = parseInt(document.getElementById('canvasH').value);
-            if (w > 0 && h > 0) { canvas.setWidth(w);
-                canvas.setHeight(h);
-                fitCanvas();
-                saveState();
-                updateStatus(); }
-        }
-
-        function updateStatus() {
-            const zoom = Math.round(canvas.getZoom() * 100);
-            document.getElementById('sizeInfo').textContent = `${canvas.width} × ${canvas.height} px`;
-            document.getElementById('zoomInfo').textContent = `${zoom}%`;
-        }
-
-        updateLayersPanel();
-        updateStatus();
-
-        // Exposer les fonctions au scope global
-        window.selectLayer = selectLayer;
-        window.toggleLayerVis = toggleLayerVis;
-        window.deleteLayer = deleteLayer;
-        window.moveLayerUp = moveLayerUp;
-        window.moveLayerDown = moveLayerDown;
-        window.duplicateLayer = duplicateLayer;
-        window.updateProp = updateProp;
-        window.rawSliderChanged = rawSliderChanged;
-        window.rawNumChanged = rawNumChanged;
-        window.applyRawToSelected = applyRawToSelected;
-        window.aiRemoveBackground = aiRemoveBackground;
-        window.aiDetectSubject = aiDetectSubject;
-        window.newDocument = newDocument;
-        window.openFile = openFile;
-        window.exportImage = exportImage;
-        window.resizeCanvas = resizeCanvas;
-        window.undo = undo;
-        window.redo = redo;
-    </script>
+      renderFeed('generalFeed', messagesStore.general);
+      showChat('chat-general');
+      console.log('✅ Vision Glassmorphism · Toutes les fonctionnalités et croix opérationnelles');
+    })();
+  </script>
 </body>
 </html>
